@@ -31,15 +31,20 @@ export type AWSOptions = {
   bucket: string;
   /**
    * indicates how long links should be available after page load (in minutes).
-   * Default to 24h. If set to 0 adapter will mark uploaded files as PUBLIC ACL.
+   * Default to 24h.
    */
   expires?: number;
+  /**
+   * If set, adapter will mark uploaded files as PUBLIC ACL.
+   */
+  setPublicAcl?: boolean;
 }
 
 export class AWSProvider extends BaseProvider {
   private s3: S3
 
   public expires: number
+  public setPublicAcl: boolean
 
   constructor(options: AWSOptions) {
     super(options.bucket)
@@ -53,6 +58,7 @@ export class AWSProvider extends BaseProvider {
       throw new Error(ERROR_MESSAGES.NO_AWS_SDK)
     }
     this.expires = options.expires ?? DAY_IN_MINUTES
+    this.setPublicAcl = options.setPublicAcl ?? false
     this.s3 = new AWS_S3(options)
   }
 
@@ -64,7 +70,7 @@ export class AWSProvider extends BaseProvider {
       Key: key,
       Body: tmpFile,
     }
-    if (!this.expires) {
+    if (this.setPublicAcl) {
       params.ACL = 'public-read'
     }
     return this.s3.upload(params, uploadOptions).promise()
