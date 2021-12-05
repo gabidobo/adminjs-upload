@@ -69,6 +69,7 @@ export class AWSProvider extends BaseProvider {
       Bucket: this.bucket,
       Key: key,
       Body: tmpFile,
+      ContentType: file.type,
     }
     if (this.setPublicAcl) {
       params.ACL = 'public-read'
